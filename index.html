@@ -234,6 +234,9 @@
                     <a href="#context-enhancers" class="toc-h2 toc-link" data-title="Context enhancers">Context enhancers</a>
                   </li>
                   <li>
+                    <a href="#helper-functions" class="toc-h2 toc-link" data-title="Helper functions">Helper functions</a>
+                  </li>
+                  <li>
                     <a href="#event-handlers" class="toc-h2 toc-link" data-title="Event handlers">Event handlers</a>
                   </li>
                   <li>
@@ -246,6 +249,9 @@
                     <a href="#models" class="toc-h2 toc-link" data-title="Models">Models</a>
                   </li>
               </ul>
+          </li>
+          <li>
+            <a href="#testing" class="toc-h1 toc-link" data-title="Testing">Testing</a>
           </li>
           <li>
             <a href="#restrictions" class="toc-h1 toc-link" data-title="Restrictions">Restrictions</a>
@@ -274,6 +280,8 @@
 <span class="c">#   /index.js</span>
 <span class="c">#   /context</span>
 <span class="c">#     /some-context-enhancer.js</span>
+<span class="c">#   /helpers</span>
+<span class="c">#     some-helper.js</span>
 <span class="c">#   /handlers</span>
 <span class="c">#     /events</span>
 <span class="c">#       /some-event.js</span>
@@ -302,6 +310,10 @@
     <span class="na">foo</span><span class="p">:</span> <span class="p">{</span>    <span class="c1">// the foo enhancer will be able to access foo under `context.config.foo`</span>
       <span class="na">bar</span><span class="p">:</span> <span class="mi">123</span>
     <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="na">config</span><span class="p">:</span> <span class="p">{</span> <span class="c1">// config which is available to all handler (invocations, tasks and events)</span>
+    <span class="na">threshold</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="na">maxSessions</span><span class="p">:</span> <span class="mi">5</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
@@ -327,7 +339,7 @@
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">env</span><span class="p">:</span> <span class="s2">"production"</span> <span class="c1">// the current environment we are running in</span>
-  <span class="na">shortEnv</span><span class="p">:</span> <span class="s2">"prod"</span><span class="p">,</span> <span class="c1">// the shortform of the current environment</span>
+  <span class="na">shortEnv</span><span class="p">:</span> <span class="s2">"prod"</span><span class="p">,</span> <span class="c1">// the short form of the current environment</span>
   <span class="na">service</span><span class="p">:</span> <span class="s2">"some-cool-service"</span><span class="p">,</span> <span class="c1">// the name of the current service</span>
   <span class="na">config</span><span class="p">:</span> <span class="p">{</span> <span class="c1">// optional config parameters which are provided automatically through the config file</span>
     <span class="na">bar</span><span class="p">:</span> <span class="mi">123</span>
@@ -337,6 +349,20 @@
 <p>A context enhancer can enhance the handlers context object. Each context enhancer gets loaded once on service startup.</p>
 
 <p>If an enhancer throws an error when run the service will abort startup.</p>
+<h2 id='helper-functions'>Helper functions</h2>
+<blockquote>
+<p>A sample helper function (this can be anything)</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// add-values.js - will be available as "context.helpers.addValues(a, b)"</span>
+
+<span class="kr">const</span> <span class="nx">add</span> <span class="o">=</span> <span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">add</span><span class="p">;</span>
+
+</code></pre>
+<p>A helper function can have any form you would like. File names will be camel cased. This means that the file name <code>foo-bar.js</code> will result in the key <code>fooBar</code>.</p>
 <h2 id='event-handlers'>Event handlers</h2>
 <blockquote>
 <p>An event handler has the following signature:</p>
@@ -397,7 +423,13 @@
     <span class="na">error</span><span class="p">:</span> <span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="p">...</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span> <span class="c1">// an error message log</span>
   <span class="p">},</span>
   <span class="p">...</span> <span class="nx">models</span><span class="p">,</span> <span class="c1">// the models available to the service</span>
-  <span class="p">...</span> <span class="nx">contextEnhancers</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="p">...</span> <span class="nx">contextEnhancers</span><span class="p">,</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all available config constants from the service configuration</span>
+  <span class="p">},</span>
+  <span class="na">helpers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all helper functions loaded from the helpers folder</span>
+  <span class="p">}</span>
 <span class="p">};</span>
 </code></pre>
 <p>An event handler gets called when a service emits an event. Events are when something happened in the emitting service, that other services might find useful. Event names are always in the past (eg. <code>something-happened</code>, <code>account-created</code> or <code>team-joined</code>).</p>
@@ -462,7 +494,13 @@
     <span class="na">error</span><span class="p">:</span> <span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="p">...</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span> <span class="c1">// an error message log</span>
   <span class="p">},</span>
   <span class="p">...</span> <span class="nx">models</span><span class="p">,</span> <span class="c1">// the models available to the service</span>
-  <span class="p">...</span> <span class="nx">contextEnhancers</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="p">...</span> <span class="nx">contextEnhancers</span><span class="p">,</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all available config constants from the service configuration</span>
+  <span class="p">},</span>
+  <span class="na">helpers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all helper functions loaded from the helpers folder</span>
+  <span class="p">}</span>
 <span class="p">};</span>
 </code></pre>
 <p>An invocation handler is the most common handler type. It should be used for direct contact with another service.</p>
@@ -504,8 +542,8 @@
       <span class="na">completed</span><span class="p">:</span> <span class="nb">Boolean</span>  <span class="c1">// true if the task was completed</span>
     <span class="p">}</span>
   <span class="p">},</span>
-  <span class="na">emit</span><span class="p">:</span> <span class="nx">async</span> <span class="p">(</span><span class="na">eventType</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="na">payload</span><span class="p">:</span> <span class="nx">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">,</span> <span class="c1">// Emit an event with a payload,</span>
-  <span class="na">invoke</span><span class="p">:</span> <span class="nx">async</span> <span class="p">(</span><span class="na">serviceName</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="na">handlerName</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="p">...</span><span class="na">params</span><span class="p">:</span> <span class="nx">any</span><span class="p">[])</span> <span class="o">=&gt;</span> <span class="nx">any</span><span class="p">,</span> <span class="c1">// Invoke a handler of this or another service,</span>
+  <span class="na">emit</span><span class="p">:</span> <span class="nx">async</span> <span class="p">(</span><span class="na">eventType</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="na">payload</span><span class="p">:</span> <span class="nx">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">,</span> <span class="c1">// Emit an event with a payload</span>
+  <span class="na">invoke</span><span class="p">:</span> <span class="nx">async</span> <span class="p">(</span><span class="na">serviceName</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="na">handlerName</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="p">...</span><span class="na">params</span><span class="p">:</span> <span class="nx">any</span><span class="p">[])</span> <span class="o">=&gt;</span> <span class="nx">any</span><span class="p">,</span> <span class="c1">// Invoke a handler of this or another service</span>
   <span class="na">cache</span><span class="p">:</span> <span class="p">{</span>  <span class="c1">// cache getters and setters</span>
     <span class="na">global</span><span class="p">:</span> <span class="p">{</span> <span class="c1">// Cache values are available for all other services</span>
       <span class="na">get</span><span class="p">:</span> <span class="nx">async</span> <span class="p">(</span><span class="nx">cacheKey</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">any</span><span class="p">,</span>  <span class="c1">// get a cached value or null</span>
@@ -522,16 +560,224 @@
     <span class="na">error</span><span class="p">:</span> <span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="p">...</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span> <span class="c1">// an error message log</span>
   <span class="p">},</span>
   <span class="p">...</span> <span class="nx">models</span><span class="p">,</span> <span class="c1">// the models available to the service</span>
-  <span class="p">...</span> <span class="nx">contextEnhancers</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="p">...</span> <span class="nx">contextEnhancers</span><span class="p">,</span> <span class="c1">// the objects defined via context enhancers</span>
+  <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all available config constants from the service configuration</span>
+  <span class="p">},</span>
+  <span class="na">helpers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// all helper functions loaded from the helpers folder</span>
+  <span class="p">}</span>
 <span class="p">};</span>
 </code></pre>
 <p>A task handler gets called when another task asks a service to do a specific task, but it does not matter when (must not run directly, only important for one service)</p>
-<h2 id='models'>Models</h2><h1 id='restrictions'>Restrictions</h1>
+<h2 id='models'>Models</h2>
+<blockquote>
+<p>A model represents a persistable, document based storable object.
+Under the hood, mongoose is used so you can define a model like you would normally do when defining a mongoose schema.</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code>
+<span class="kr">const</span> <span class="nx">modelDefinition</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">firstName</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">type</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+    <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">},</span>
+  <span class="na">cool</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">type</span><span class="p">:</span> <span class="nb">Boolean</span><span class="p">,</span>
+    <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">default</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">modelDefinition</span><span class="p">;</span>
+
+</code></pre>
+<p>Define the models you need as separate files inside the models directory.
+They become available in all handlers (invocations, events and tasks) as their camel cased name under the context.</p>
+
+<p>Example:</p>
+
+<p>The model definition file <code>models/user-account.js</code> will become available as <code>context.userAccount</code>;</p>
+<h3 id='model-methods'>Model methods</h3>
+<blockquote>
+<p>A model contains the default CRUD methods plus count and distinct.</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code>
+<span class="c1">// some handler, we will use the model defined above</span>
+
+<span class="kr">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="nx">async</span> <span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+<span class="c1">// count all matching query</span>
+<span class="kr">const</span> <span class="nx">accountCount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">count</span><span class="p">({</span><span class="na">cool</span><span class="p">:</span> <span class="kc">true</span><span class="p">});</span>
+
+<span class="c1">// distinct fields matching query</span>
+<span class="kr">const</span> <span class="nx">distinctFirstNames</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">distinct</span><span class="p">(</span><span class="s1">'firstName'</span><span class="p">,</span> <span class="p">{</span><span class="na">cool</span><span class="p">:</span> <span class="kc">false</span><span class="p">});</span>
+<span class="c1">// returns an array of strings of all account first names where cool is false.</span>
+
+<span class="c1">// Create one model.</span>
+<span class="kr">const</span> <span class="nx">newAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">createOne</span><span class="p">({</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'John'</span><span class="p">});</span>
+<span class="cm">/*
+const newAccount = {
+    id: 'uuid',
+    firstName: 'John',
+    createdAt: 'ISO Timestamp',
+    updatedAt: 'ISO Timestamp'
+  };
+*/</span>
+
+<span class="c1">// Create one model.</span>
+<span class="kr">const</span> <span class="nx">newAccounts</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">createMany</span><span class="p">([{</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'Peter'</span><span class="p">}]);</span>
+<span class="cm">/*
+const newAccounts = [
+    {
+      id: 'uuid',
+      firstName: 'Peter',
+      createdAt: 'ISO Timestamp',
+      updatedAt: 'ISO Timestamp'
+    }
+  ]
+*/</span>
+
+<span class="c1">// find one</span>
+<span class="kr">const</span> <span class="nx">someAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'Hans'</span><span class="p">});</span>
+<span class="c1">// or find by id</span>
+<span class="kr">const</span> <span class="nx">anotherAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">findOneById</span><span class="p">(</span><span class="s1">'some-uuid'</span><span class="p">);</span>
+<span class="c1">// or find many</span>
+<span class="kr">const</span> <span class="nx">moreAccounts</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">findMany</span><span class="p">({</span><span class="na">cool</span><span class="p">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// update one account</span>
+<span class="kr">const</span> <span class="nx">updatedAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">updateOne</span><span class="p">({</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'Hans'</span><span class="p">},</span> <span class="p">{</span><span class="na">cool</span><span class="p">:</span> <span class="kc">true</span><span class="p">});</span>
+<span class="c1">// or update one account by id</span>
+<span class="kr">const</span> <span class="nx">anotherUpdatedAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">updateOneById</span><span class="p">(</span><span class="s1">'some-uuid'</span><span class="p">,</span> <span class="p">{</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'Anna'</span><span class="p">});</span>
+<span class="c1">// or update many</span>
+<span class="kr">const</span> <span class="nx">moreUpdatedAccounts</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">updateMany</span><span class="p">({</span><span class="na">cool</span><span class="p">:</span> <span class="kc">false</span><span class="p">},</span> <span class="p">{</span><span class="na">cool</span><span class="p">:</span> <span class="kc">true</span><span class="p">});</span>
+
+<span class="c1">// remove one account</span>
+<span class="kr">const</span> <span class="nx">removedAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">removeOne</span><span class="p">({</span><span class="na">firstName</span><span class="p">:</span> <span class="s1">'Hans'</span><span class="p">});</span>
+<span class="c1">// or remove one account by id</span>
+<span class="kr">const</span> <span class="nx">anotherRemovedAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">removeOneById</span><span class="p">(</span><span class="s1">'some-uuid'</span><span class="p">);</span>
+<span class="c1">// or remove many</span>
+<span class="kr">const</span> <span class="nx">moreRemovedAccounts</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">userAccount</span><span class="p">.</span><span class="nx">removeMany</span><span class="p">({</span><span class="na">cool</span><span class="p">:</span> <span class="kc">true</span><span class="p">});</span>
+
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">handler</span><span class="p">;</span>
+
+</code></pre><h1 id='testing'>Testing</h1>
+<p>Testing was designed to be super simple and independent of other services. As a test framework jest is supposed to be used.</p>
+
+<blockquote>
+<p>Lets imagine we have an invocation handler file <code>create-account.js</code>.</p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// create-account.js</span>
+
+<span class="cm">/**
+ * This handler will create a new user account.
+ *
+ * @param context &lt;&gt; - The default invocation context
+ * @param name &lt;String&gt; - The name of the new account
+ *
+ * @returns the new account
+ */</span>
+<span class="kr">const</span> <span class="nx">createAccount</span> <span class="o">=</span> <span class="nx">async</span> <span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">firstName</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">newAccount</span><span class="p">;</span>
+
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">newAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">foo</span><span class="p">.</span><span class="nx">createOne</span><span class="p">({</span> <span class="nx">name</span> <span class="p">});</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">context</span><span class="p">.</span><span class="nx">log</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s1">'Failed to create account'</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="k">throw</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">'Failed to create account'</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">await</span> <span class="nx">context</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'account-created'</span><span class="p">,</span> <span class="nx">newAccount</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">newAccount</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">createAccount</span><span class="p">;</span>
+</code></pre>
+<blockquote>
+<p>To test it we will create a new file next to it called <code>create-account.test.js</code></p>
+</blockquote>
+<pre class="highlight javascript tab-javascript"><code><span class="c1">// create-account.test.js</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">handler</span><span class="p">,</span> <span class="nx">contextBuilder</span><span class="p">,</span> <span class="nx">db</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">requireHandler</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'./create-account'</span><span class="p">);</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'create-account'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+  <span class="nx">it</span><span class="p">(</span><span class="s1">'account creation should return account object with correct properties'</span><span class="p">,</span> <span class="nx">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kr">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">contextBuilder</span><span class="p">();</span>
+    <span class="kr">const</span> <span class="nx">firstName</span> <span class="o">=</span> <span class="s1">'Peter'</span><span class="p">;</span>
+
+    <span class="c1">// Act</span>
+    <span class="kr">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">firstName</span><span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">account</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toBeNull</span><span class="p">();</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">account</span><span class="p">.</span><span class="nx">firstName</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">firstName</span><span class="p">);</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">account</span><span class="p">.</span><span class="nx">cool</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+  <span class="p">});</span>
+
+  <span class="nx">it</span><span class="p">(</span><span class="s1">'account creation should emit account-created event'</span><span class="p">,</span> <span class="nx">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kr">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">contextBuilder</span><span class="p">();</span>
+    <span class="kr">const</span> <span class="nx">firstName</span> <span class="o">=</span> <span class="s1">'Peter'</span><span class="p">;</span>
+
+    <span class="c1">// Act</span>
+    <span class="kr">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">firstName</span><span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+    <span class="c1">// This uses mocks from jest. They are accessible through context.mocks.emit('event'), context.mocks.invoke('service', 'handler') and context.mocks.task.create('service', 'task-handler')</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">mocks</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'account-created'</span><span class="p">)).</span><span class="nx">toHaveBeenCalledWith</span><span class="p">(</span><span class="nx">account</span><span class="p">);</span>
+  <span class="p">});</span>
+
+  <span class="nx">it</span><span class="p">(</span><span class="s1">'Lets imagine that our service calls another service and relies on a value'</span><span class="p">,</span> <span class="nx">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kr">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">contextBuilder</span><span class="p">();</span>
+    <span class="kr">const</span> <span class="nx">firstName</span> <span class="o">=</span> <span class="s1">'Peter'</span><span class="p">;</span>
+
+    <span class="c1">// the following line would mock the return value of the in-handler invoke call to the handler "some-handler" of "some-service" to return {id: '123', allGood: true}</span>
+    <span class="c1">// check https://jestjs.io/docs/en/mock-function-api.html to get a full list of values</span>
+    <span class="nx">context</span><span class="p">.</span><span class="nx">mocks</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="s1">'some-service'</span><span class="p">,</span> <span class="s1">'some-handler'</span><span class="p">).</span><span class="nx">mockReturnValue</span><span class="p">({</span><span class="na">id</span><span class="p">:</span> <span class="s1">'123'</span><span class="p">,</span> <span class="na">allGood</span><span class="p">:</span> <span class="kc">true</span><span class="p">});</span>
+
+    <span class="c1">// Act</span>
+    <span class="nx">await</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">firstName</span><span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+    <span class="c1">// This uses mocks from jest. They are accessible through context.mocks.emit('event'), context.mocks.invoke('service', 'handler') and context.mocks.task.create('service', 'task-handler')</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">mocks</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="s1">'some-service'</span><span class="p">,</span> <span class="s1">'some-handler'</span><span class="p">)).</span><span class="nx">toHaveBeenCalledTimes</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="c1">// or simply</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">mocks</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="s1">'some-service'</span><span class="p">,</span> <span class="s1">'some-handler'</span><span class="p">)).</span><span class="nx">toHaveBeenCalled</span><span class="p">();</span>
+  <span class="p">});</span>
+
+<span class="p">});</span>
+
+</code></pre>
+<p>For this to work we will need to install the flare rest plugin and add a jest plugin definition.</p>
+
+<p><code>yarn add -D jest-plugins jest-plugin-flare</code></p>
+
+<p>You will also need to create a file called <code>jest-plugins.js</code> in the root of your service.</p>
+<pre class="highlight javascript tab-javascript"><code><span class="cm">/* eslint-disable import/no-extraneous-dependencies */</span>
+<span class="c1">// jest-plugins.js</span>
+<span class="nx">require</span><span class="p">(</span><span class="s1">'jest-plugins'</span><span class="p">)([</span>
+  <span class="s1">'jest-plugin-flare'</span><span class="p">,</span>
+<span class="p">]);</span>
+</code></pre>
+<blockquote>
+<p>As well as modifing the <code>package.json</code> to include the following block</p>
+</blockquote>
+<pre class="highlight plaintext"><code>{
+  # ... rest of package.json
+  "jest": {
+    "setupTestFrameworkScriptFile": "./jest-plugins.js"
+  }
+}
+</code></pre><h1 id='restrictions'>Restrictions</h1>
 <p>Some restrictions apply.</p>
 <h3 id='the-service-name'>The service name</h3>
 <p>A service name may not start with the prefix <code>sys-</code> as it is reserved for system services with possibly escalated privileges.</p>
 <h3 id='context-enhancers-2'>Context enhancers</h3>
-<p>Context enhancers may not have the following names: <code>cid</code>, <code>invocation</code>, <code>task</code>, <code>event</code>, <code>invoke</code>, <code>emit</code>, <code>self</code>, <code>log</code>, <code>cache</code> or any registered model name.</p>
+<p>Context enhancers may not have the following names: <code>cid</code>, <code>helpers</code>, <code>config</code>, <code>invocation</code>, <code>task</code>, <code>event</code>, <code>invoke</code>, <code>emit</code>, <code>self</code>, <code>log</code>, <code>cache</code> or any registered model name or context enhancer name.</p>
 
       </div>
       <div class="dark-box">
